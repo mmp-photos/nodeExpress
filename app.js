@@ -7,10 +7,10 @@ const config = require('./config');
 
 var indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-const campsitesRouter = require('./routes/campsitesRouter')
-const promotionRouter = require('./routes/promotionRouter')
-const partnerRouter = require('./routes/partnerRouter')
-
+const campsitesRouter = require('./routes/campsitesRouter');
+const promotionRouter = require('./routes/promotionRouter');
+const partnerRouter = require('./routes/partnerRouter');
+const uploadRouter = require('./routes/uploadRouter');
 const mongoose = require('mongoose');
 
 const url = config.mongoUrl;
@@ -87,6 +87,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/campsites', campsitesRouter);
 app.use('/partner', partnerRouter);
 app.use('/promotion', promotionRouter);
+app.use('/imageUpload', uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
