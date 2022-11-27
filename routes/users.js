@@ -1,12 +1,13 @@
 const express = require('express');
 const User = require('../models/user');
 const authenticate = require('../authenticate');
+const cors = require('./cors');
 
 const router = express.Router();
 const passport = require('passport');
 
 // GET USERS LISTING //
-router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
+router.get('/', cors.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next) => {
   User.find()
   .then(users => {
     res.statusCode = 200;
@@ -17,7 +18,7 @@ router.get('/', authenticate.verifyUser, authenticate.verifyAdmin, (req, res, ne
 });
 
 // POST USER SIGNUP //
-router.post('/signup', (req, res) => {
+router.post('/signup', cors.corsWithOptions, (req, res) => {
     User.register(
       new User({username: req.body.username}),
       req.body.password,
@@ -52,7 +53,7 @@ router.post('/signup', (req, res) => {
 });
 
 // POST USER LOGIN //
-router.post('/login', passport.authenticate('local'), (req, res) => {
+router.post('/login', cors.corsWithOptions, passport.authenticate('local'), (req, res) => {
     const token = authenticate.getToken({_id: req.user._id});
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
@@ -101,7 +102,7 @@ router.post('/login', passport.authenticate('local'), (req, res) => {
 });
 
 // GET USER SIGNOUT //
-router.post('/logout', authenticate.verifyUser, (req, res, next) => {
+router.post('/logout', cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     if(req.session) {
         req.session.destroy();
         res.clearCookie('session.id');
@@ -110,6 +111,19 @@ router.post('/logout', authenticate.verifyUser, (req, res, next) => {
         const err = new Error('You are not logged in');
         return next(err);
     }
+});
+
+// GET USER FACEBOOK SIGN-IN //
+router.get('/facebook/token', passport.authenticate('facebook-token'), (req, res, next) => {
+  if (req.user) {
+      const token = authenticate.getToken({_id: req.user._id});
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({success: true, token: token, status: 'You are successfully logged in!'});
+  }
+  else {
+    return next(err);
+  }
 });
 
 module.exports = router;
